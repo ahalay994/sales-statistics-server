@@ -1,0 +1,238 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User
+model Access {
+  id         Int          @id @default(autoincrement())
+  slug       String       @db.VarChar(100)
+  name       String       @db.VarChar(100)
+  UserAccess UserAccess[]
+}
+
+model UserAccess {
+  User     User   @relation(fields: [userId], references: [id])
+  userId   Int    @unique
+  Access   Access @relation(fields: [accessId], references: [id])
+  accessId Int
+
+  @@id([accessId])
+}
+
+model Profile {
+  id             Int       @id @default(autoincrement())
+  firstName      String?   @db.VarChar(30)
+  lastName       String?   @db.VarChar(30)
+  patronymicName String?   @db.VarChar(30)
+  dateOfBirth    DateTime?
+  User           User      @relation(fields: [userId], references: [id])
+  userId         Int       @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  email      String      @unique
+  password   String      @unique
+  isBlocked  Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
+  Profile    Profile?
+  UserAccess UserAccess?
+  Sale       Sale[]
+  Calendar   Calendar[]
+}
+
+// Products
+model Category {
+  id               Int              @id @default(autoincrement())
+  name             String           @db.VarChar(100)
+  slug             String           @unique @db.VarChar(100)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  deletedAt        DateTime?
+  ProductCategory  ProductCategory?
+  parentId         Int?
+  parentCategory   Category?        @relation("CategoryToCategory", fields: [parentId], references: [id])
+  childrenCategory Category[]       @relation("CategoryToCategory")
+  ProductTag       ProductTag[]
+}
+
+model Product {
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @db.VarChar(255)
+  slug                  String                  @unique @db.VarChar(255)
+  desctiption           String
+  image                 String?                 @db.VarChar(255)
+  ProductCategory       ProductCategory?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  deletedAt             DateTime?
+  ProductType           ProductType[]
+  ProductCharacteristic ProductCharacteristic[]
+  ProductTag            ProductTag[]
+  ProductShop           ProductShop[]
+  SalesProduct          SalesProduct[]
+}
+
+model ProductCategory {
+  product    Product?  @relation(fields: [productId], references: [id])
+  productId  Int       @unique
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId Int       @unique
+}
+
+model ProductType {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  desctiption String
+  image       String?  @db.VarChar(255)
+  price       Float
+  product     Product? @relation(fields: [productId], references: [id])
+  productId   Int
+}
+
+model Characteristic {
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @unique @db.VarChar(100)
+  slug                  String                  @unique @db.VarChar(100)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  deletedAt             DateTime?
+  ProductCharacteristic ProductCharacteristic[]
+}
+
+model ProductCharacteristic {
+  product          Product        @relation(fields: [productId], references: [id])
+  productId        Int
+  characteristic   Characteristic @relation(fields: [characteristicId], references: [id])
+  characteristicId Int
+  description      String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@id([characteristicId, productId])
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  slug      String   @unique @db.VarChar(100)
+  color     String   @default("#000000") @db.VarChar(30)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductTag {
+  product   Product   @relation(fields: [productId], references: [id])
+  productId Int
+  tag       Category? @relation(fields: [tagId], references: [id])
+  tagId     Int
+
+  @@id([productId, tagId])
+}
+
+// Shop
+model Shop {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(150)
+  slug        String        @unique @db.VarChar(150)
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  ShopAddress ShopAddress?
+  ProductShop ProductShop[]
+  Sale        Sale[]
+  Calendar    Calendar[]
+}
+
+model ShopAddress {
+  id        Int       @id @default(autoincrement())
+  address   String    @db.VarChar(255)
+  lat       Float?
+  lon       Float?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  Shop      Shop?     @relation(fields: [shopId], references: [id])
+  shopId    Int       @unique
+}
+
+model ProductShop {
+  Shop      Shop?    @relation(fields: [shopId], references: [id])
+  shopId    Int
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId Int
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([shopId, productId])
+}
+
+model Sale {
+  id           Int            @id @default(autoincrement())
+  User         User           @relation(fields: [userId], references: [id])
+  userId       Int
+  Shop         Shop?          @relation(fields: [shopId], references: [id])
+  shopId       Int
+  comment      String?        @db.VarChar(255)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  SalesProduct SalesProduct[]
+}
+
+model SalesProduct {
+  Sale      Sale     @relation(fields: [saleId], references: [id])
+  saleId    Int
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId Int
+  count     Int
+  price     Float
+
+  @@id([saleId, productId])
+}
+
+////////////////////////////
+
+model TypeDay {
+  id       Int        @id @default(autoincrement())
+  title    String     @db.VarChar(100)
+  slug     String     @unique @db.VarChar(100)
+  message  String
+  Calendar Calendar[]
+}
+
+model Calendar {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  User      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  Shop      Shop?    @relation(fields: [shopId], references: [id])
+  shopId    Int?
+  TypeDay   TypeDay  @relation(fields: [typeDayId], references: [id])
+  typeDayId Int
+}
+
+model Log {
+  id      Int      @id @default(autoincrement())
+  model   String
+  modelId Int
+  action  String
+  userId  Int
+  ip      String
+  date    DateTime @default(now())
+}

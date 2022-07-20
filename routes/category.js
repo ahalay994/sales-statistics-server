@@ -1,0 +1,10 @@
+const router = require('express').Router();
+const categoryController = require('../controllers/category.controller');
+const auth = require('../middlewares/auth');
+router.get('/', categoryController.all);
+router.get('/:id', categoryController.get);
+router.post('/', auth, categoryController.create);
+router.put('/:id', auth, categoryController.update);
+router.delete('/:id', auth, categoryController.delete);
+router.patch('/:id', auth, categoryController.restore);
+module.exports = router;

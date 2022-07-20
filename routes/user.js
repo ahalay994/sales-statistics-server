@@ -1,0 +1,10 @@
+const router = require('express').Router();
+const userController = require('../controllers/user.controller');
+const auth = require('../middlewares/auth');
+router.get('/', userController.all);
+router.get('/:id', userController.get);
+router.post('/', userController.create);
+router.put('/:id', userController.update);
+router.delete('/:id', userController.delete);
+router.patch('/reset-password/:id?', auth, userController.resetPassword);
+module.exports = router;
