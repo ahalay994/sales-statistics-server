@@ -6,7 +6,7 @@ const ip = require("ip");
 
 prisma.$use(async (params, next) => {
     let {args: {data}} = params;
-    if ((params.action === 'create' || params.action === 'update') && ['Category'].includes(params.model)) {
+    if ((params.action === 'create' || params.action === 'update') && ['Category', 'Product'].includes(params.model)) {
         if (!!data.name) {
             data.slug = slugify(`${data.name}`, {lower: true, strict: true, remove: /[*+~.()'"!:@]/g});
         }

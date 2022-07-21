@@ -22,10 +22,6 @@ class AuthController {
             let data = await auth.login(req.body);
             data = {
                 email: data.email,
-                firstName: data.Profile.firstName,
-                lastName: data.Profile.lastName,
-                patronymicName: data.Profile.patronymicName,
-                dateOfBirth: data.Profile.dateOfBirth,
                 accessToken: data.accessToken
             };
             res.status(200).json({

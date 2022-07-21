@@ -1,5 +1,5 @@
 const userService = require('../services/user.service');
-const errors = require('../helper/errors');
+const {controllerError} = require('../helper/controller.helper');
 const { userDto, usersDto } = require("../dto/user.dto");
 
 class UserController {
@@ -8,11 +8,11 @@ class UserController {
             const data = await userService.get(Number(req.params.id));
             res.status(200).json({
                 status: true,
-                message: `Пользователь #${req.params.id}`,
+                message: `Пользователь #${data.id}`,
                 data: userDto(data)
             });
         } catch (e) {
-            errors.controllerError(res, e);
+            controllerError(res, e);
         }
     }
     static all = async (req, res) => {
@@ -24,7 +24,7 @@ class UserController {
                 data: usersDto(data)
             });
         } catch (e) {
-            errors.controllerError(res, e);
+            controllerError(res, e);
         }
     }
     static create = async (req, res) => {
@@ -36,7 +36,7 @@ class UserController {
                 data: userDto(data)
             });
         } catch (e) {
-            errors.controllerError(res, e);
+            controllerError(res, e);
         }
     }
     static update = async (req, res) => {
@@ -44,11 +44,11 @@ class UserController {
             const data = await userService.create(Number(req.params.id), req);
             res.status(200).json({
                 status: true,
-                message: `Данные пользователя #${req.params.id} обновлены`,
+                message: `Данные пользователя #${data.id} обновлены`,
                 data: userDto(data)
             });
         } catch (e) {
-            errors.controllerError(res, e);
+            controllerError(res, e);
         }
     }
     static resetPassword = async (req, res) => {
@@ -57,21 +57,21 @@ class UserController {
             await userService.resetPassword(req.body.password, id);
             res.status(200).json({
                 status: true,
-                message: `Пароль пользователя #${req.params.id} обновлён`
+                message: `Пароль пользователя #${data.id} обновлён`
             });
         } catch (e) {
-            errors.controllerError(res, e);
+            controllerError(res, e);
         }
     }
     static delete = async (req, res) => {
         try {
-            await userService.delete(Number(req.params.id));
+            const data = await userService.delete(Number(req.params.id));
             res.status(200).json({
                 status: true,
-                message: `Пользователь #${req.params.id} удалён`,
+                message: `Пользователь #${data.id} удалён`,
             });
         } catch (e) {
-            errors.controllerError(res, e);
+            controllerError(res, e);
         }
     }
     static restore = async (req, res) => {
@@ -79,11 +79,11 @@ class UserController {
             const data = await userService.restore(Number(req.params.id));
             res.status(200).json({
                 status: true,
-                message: `Пользователь #${req.params.id} восстановлен`,
+                message: `Пользователь #${data.id} восстановлен`,
                 data: userDto(data)
             });
         } catch (e) {
-            errors.controllerError(res, e);
+            controllerError(res, e);
         }
     }
 }

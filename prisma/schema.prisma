@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,21 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User
 model Access {
-  id         Int          @id @default(autoincrement())
-  slug       String       @db.VarChar(100)
-  name       String       @db.VarChar(100)
-  UserAccess UserAccess[]
+  id         Int         @id @default(autoincrement())
+  slug       String      @db.VarChar(100)
+  name       String      @db.VarChar(100)
+  UserAccess UserAccess?
 }
 
 model UserAccess {
-  User     User   @relation(fields: [userId], references: [id])
   userId   Int    @unique
+  accessId Int    @id
   Access   Access @relation(fields: [accessId], references: [id])
-  accessId Int
-
-  @@id([accessId])
+  User     User   @relation(fields: [userId], references: [id])
 }
 
 model Profile {
@@ -33,11 +27,11 @@ model Profile {
   lastName       String?   @db.VarChar(30)
   patronymicName String?   @db.VarChar(30)
   dateOfBirth    DateTime?
-  User           User      @relation(fields: [userId], references: [id])
   userId         Int       @unique
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
+  User           User      @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -48,24 +42,23 @@ model User {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   deletedAt  DateTime?
-  Profile    Profile?
-  UserAccess UserAccess?
-  Sale       Sale[]
   Calendar   Calendar[]
+  Profile    Profile?
+  Sale       Sale[]
+  UserAccess UserAccess?
 }
 
-// Products
 model Category {
   id               Int              @id @default(autoincrement())
   name             String           @db.VarChar(100)
   slug             String           @unique @db.VarChar(100)
   createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @default(now()) @updatedAt
   deletedAt        DateTime?
-  ProductCategory  ProductCategory?
+  updatedAt        DateTime         @default(now()) @updatedAt
   parentId         Int?
   parentCategory   Category?        @relation("CategoryToCategory", fields: [parentId], references: [id])
   childrenCategory Category[]       @relation("CategoryToCategory")
+  ProductCategory  ProductCategory?
   ProductTag       ProductTag[]
 }
 
@@ -73,35 +66,35 @@ model Product {
   id                    Int                     @id @default(autoincrement())
   name                  String                  @db.VarChar(255)
   slug                  String                  @unique @db.VarChar(255)
-  desctiption           String
   image                 String?                 @db.VarChar(255)
-  ProductCategory       ProductCategory?
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   deletedAt             DateTime?
-  ProductType           ProductType[]
+  description           String
+  ProductCategory       ProductCategory?
   ProductCharacteristic ProductCharacteristic[]
-  ProductTag            ProductTag[]
   ProductShop           ProductShop[]
+  ProductTag            ProductTag[]
+  ProductType           ProductType[]
   SalesProduct          SalesProduct[]
 }
 
 model ProductCategory {
-  product    Product?  @relation(fields: [productId], references: [id])
-  productId  Int       @unique
-  category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId Int       @unique
+  productId  Int      @unique
+  categoryId Int      @unique
+  category   Category @relation(fields: [categoryId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
 }
 
 model ProductType {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(100)
-  slug        String   @unique @db.VarChar(100)
-  desctiption String
-  image       String?  @db.VarChar(255)
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(100)
+  slug        String  @unique @db.VarChar(100)
+  image       String? @db.VarChar(255)
   price       Float
-  product     Product? @relation(fields: [productId], references: [id])
   productId   Int
+  description String
+  product     Product @relation(fields: [productId], references: [id])
 }
 
 model Characteristic {
@@ -115,13 +108,13 @@ model Characteristic {
 }
 
 model ProductCharacteristic {
-  product          Product        @relation(fields: [productId], references: [id])
   productId        Int
-  characteristic   Characteristic @relation(fields: [characteristicId], references: [id])
   characteristicId Int
   description      String
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+  characteristic   Characteristic @relation(fields: [characteristicId], references: [id])
+  product          Product        @relation(fields: [productId], references: [id])
 
   @@id([characteristicId, productId])
 }
@@ -136,15 +129,14 @@ model Tag {
 }
 
 model ProductTag {
-  product   Product   @relation(fields: [productId], references: [id])
   productId Int
-  tag       Category? @relation(fields: [tagId], references: [id])
   tagId     Int
+  product   Product  @relation(fields: [productId], references: [id])
+  tag       Category @relation(fields: [tagId], references: [id])
 
   @@id([productId, tagId])
 }
 
-// Shop
 model Shop {
   id          Int           @id @default(autoincrement())
   name        String        @db.VarChar(150)
@@ -153,10 +145,10 @@ model Shop {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   deletedAt   DateTime?
-  ShopAddress ShopAddress?
+  Calendar    Calendar[]
   ProductShop ProductShop[]
   Sale        Sale[]
-  Calendar    Calendar[]
+  ShopAddress ShopAddress?
 }
 
 model ShopAddress {
@@ -167,46 +159,44 @@ model ShopAddress {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  Shop      Shop?     @relation(fields: [shopId], references: [id])
   shopId    Int       @unique
+  Shop      Shop      @relation(fields: [shopId], references: [id])
 }
 
 model ProductShop {
-  Shop      Shop?    @relation(fields: [shopId], references: [id])
   shopId    Int
-  Product   Product? @relation(fields: [productId], references: [id])
   productId Int
   balance   Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Product   Product  @relation(fields: [productId], references: [id])
+  Shop      Shop     @relation(fields: [shopId], references: [id])
 
   @@id([shopId, productId])
 }
 
 model Sale {
   id           Int            @id @default(autoincrement())
-  User         User           @relation(fields: [userId], references: [id])
   userId       Int
-  Shop         Shop?          @relation(fields: [shopId], references: [id])
   shopId       Int
   comment      String?        @db.VarChar(255)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  Shop         Shop           @relation(fields: [shopId], references: [id])
+  User         User           @relation(fields: [userId], references: [id])
   SalesProduct SalesProduct[]
 }
 
 model SalesProduct {
-  Sale      Sale     @relation(fields: [saleId], references: [id])
   saleId    Int
-  Product   Product? @relation(fields: [productId], references: [id])
   productId Int
   count     Int
   price     Float
+  Product   Product @relation(fields: [productId], references: [id])
+  Sale      Sale    @relation(fields: [saleId], references: [id])
 
   @@id([saleId, productId])
 }
-
-////////////////////////////
 
 model TypeDay {
   id       Int        @id @default(autoincrement())
@@ -219,12 +209,12 @@ model TypeDay {
 model Calendar {
   id        Int      @id @default(autoincrement())
   date      DateTime
-  User      User     @relation(fields: [userId], references: [id])
   userId    Int
-  Shop      Shop?    @relation(fields: [shopId], references: [id])
   shopId    Int?
-  TypeDay   TypeDay  @relation(fields: [typeDayId], references: [id])
   typeDayId Int
+  Shop      Shop?    @relation(fields: [shopId], references: [id])
+  TypeDay   TypeDay  @relation(fields: [typeDayId], references: [id])
+  User      User     @relation(fields: [userId], references: [id])
 }
 
 model Log {

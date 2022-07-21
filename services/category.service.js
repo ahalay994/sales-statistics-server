@@ -1,116 +1,48 @@
 const prisma = require('../utils/prisma');
 const createError = require('http-errors');
+const {getApi, allApi, createApi, updateApi, deleteOrRestore} = require("../api");
 
 class CategoryService {
-    static async get(id) {
-        const record = await prisma.category.findFirst({
-            where: {
-                id,
-                deletedAt: null,
-            },
+    static model = 'category'
+
+    static async get(key) {
+        const include = {
             include: {
                 childrenCategory: true
             }
-        });
-        if (!record) {
-            throw createError(404, 'Категория не найдена');
         }
-        return record;
+        return await getApi(key, this.model, include);
     }
 
     static async all() {
-        return await prisma.category.findMany({
-            where: {
-                deletedAt: null,
-                parentId: null,
-            },
+        const include = {
             include: {
                 childrenCategory: true
             }
-        });
+        }
+        return await allApi(this.model, include, true, null);
     }
 
     static async create(data, user) {
-        let record = await prisma.category.findFirst({
-            where: {
-                name: {
-                    mode: 'insensitive',
-                    contains: data.name,
-                },
-            },
-        });
-        if (record) {
-            throw createError(400, 'Данная категория существует!')
-        }
-
-        return prisma.category.create({
+        data = {
             data: {
-                name: data.name,
+                ...data,
                 parentId: data.parentId || null,
-                user
             }
-        });
+        }
+        return await createApi(data, this.model, user);
     }
 
-    static async update(id, data, user) {
-        let record = await prisma.category.findUnique({
-            where: {
-                id
-            },
-        });
-        if (!record) {
-            throw createError(404, 'Данная категория отсутствует!')
-        }
-        return prisma.category.update(
-            {
-                where: { id },
-                data: {
-                    name: data.name || record.name,
-                    parentId: data.parentId || record.parentId,
-                    user
-                }
-            }
-        );
+    static async update(key, data, user) {
+        return await updateApi(key, data, this.model, true, user);
     }
 
-    static async delete(id, user) {
-        let record = await prisma.category.findUnique({
-            where: {
-                id
-            },
-        });
-        if (!record) {
-            throw createError(404, 'Данная категория отсутствует!')
-        }
-        return prisma.category.update(
-            {
-                where: { id },
-                data: {
-                    deletedAt: new Date(),
-                    user
-                }
-            }
-        );
+    static async delete(key, user) {
+        return await deleteOrRestore(key, this.model, true, user);
     }
 
-    static async restore(id, user) {
-        let record = await prisma.category.findUnique({
-            where: {
-                id
-            },
-        });
-        if (!record) {
-            throw createError(404, 'Данная категория отсутствует!')
-        }
-        return prisma.category.update(
-            {
-                where: { id },
-                data: {
-                    deletedAt: null,
-                    user
-                }
-            }
-        );
+    static async restore(key, user) {
+        return await deleteOrRestore(key, this.model, false, user);
     }
 }
 
