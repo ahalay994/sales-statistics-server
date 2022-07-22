@@ -10,6 +10,8 @@ const userDto = (user) => ({
     access: user.UserAccess?.Access?.name,
     /** @type {boolean} */
     isAdmin: user.UserAccess?.Access?.slug === 'admin',
+    /** @type string */
+    accessToken: user.accessToken || undefined,
     /** @type {profileDto} */
     profile: user.Profile ? profileDto(user.Profile) : undefined,
 });
