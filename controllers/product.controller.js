@@ -1,12 +1,15 @@
-const productService = require('../services/product.service');
+const ProductService = require('../services/product.service');
 const {controllerError, controllerSuccess} = require("../helper/controller.helper");
 const {productDto, productsPaginationDto} = require("../dto/product.dto");
 
 class ProductController {
+    static model = 'product';
+    static productService = new ProductService(this.model);
+
     static get = async (req, res) => {
         try {
-            const data = await productService.get(req.params.key);
-            return controllerSuccess(res, 'get', 'product', data.id, productDto(data));
+            const data = await this.productService.get(req.params.key);
+            return controllerSuccess(res, 'get', this.model, data.id, productDto(data));
         }
         catch (e) {
             controllerError(res, e);
@@ -16,8 +19,8 @@ class ProductController {
     static all = async (req, res) => {
         try {
             const { page = 1, limit = 10 } = req.query;
-            const data = await productService.all(page, limit);
-            return controllerSuccess(res, 'all', 'product', null, productsPaginationDto(data, page, limit));
+            const data = await this.productService.all(page, limit);
+            return controllerSuccess(res, 'all', this.model, null, productsPaginationDto(data, page, limit));
         }
         catch (e) {
             controllerError(res, e);
@@ -26,8 +29,8 @@ class ProductController {
 
     static create = async (req, res) => {
         try {
-            const data = await productService.create(req.body, req.user.payload);
-            return controllerSuccess(res, 'create', 'product', data.id, productDto(data));
+            const data = await this.productService.create(req.body, req.user.payload);
+            return controllerSuccess(res, 'create', this.model, data.id, productDto(data));
         } catch (e) {
             controllerError(res, e);
         }
@@ -35,8 +38,8 @@ class ProductController {
 
     static update = async (req, res) => {
         try {
-            const data = await productService.update(req.params.key, req.body, req.user.payload);
-            return controllerSuccess(res, 'update', 'product', data.id, productDto(data));
+            const data = await this.productService.update(req.params.key, req.body, req.user.payload);
+            return controllerSuccess(res, 'update', this.model, data.id, productDto(data));
         }
         catch (e) {
             controllerError(res, e);
@@ -45,8 +48,8 @@ class ProductController {
 
     static delete = async (req, res) => {
         try {
-            const data = await productService.delete(req.params.key, req.user.payload);
-            return controllerSuccess(res, 'delete', 'product', data.id);
+            const data = await this.productService.delete(req.params.key, req.user.payload);
+            return controllerSuccess(res, 'delete', this.model, data.id);
         }
         catch (e) {
             controllerError(res, e);
@@ -55,8 +58,8 @@ class ProductController {
 
     static restore = async (req, res) => {
         try {
-            const data = await productService.restore(Number(req.params.key), req.user.payload);
-            return controllerSuccess(res, 'restore', 'product', data.id, productDto(data));
+            const data = await this.productService.restore(Number(req.params.key), req.user.payload);
+            return controllerSuccess(res, 'restore', this.model, data.id, productDto(data));
         }
         catch (e) {
             controllerError(res, e);

@@ -39,11 +39,11 @@ class AuthController {
             let data = await auth.user(req.user.payload)
             data = {
                 email: data.email,
-                firstName: data.profile.firstName,
-                lastName: data.profile.lastName,
-                patronymicName: data.profile.patronymicName,
-                dateOfBirth: data.profile.dateOfBirth,
-                isAdmin: data.UserAccess.Access.slug === 'admin'
+                firstName: data.profile?.firstName,
+                lastName: data.profile?.lastName,
+                patronymicName: data.profile?.patronymicName,
+                dateOfBirth: data.profile?.dateOfBirth,
+                isAdmin: data.UserAccess?.Access?.slug === 'admin'
             };
             res.status(200).json({
                 status: true,

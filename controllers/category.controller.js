@@ -1,12 +1,15 @@
-const categoryService = require('../services/category.service');
+const CategoryService = require('../services/category.service');
 const {controllerError, controllerSuccess} = require("../helper/controller.helper");
 const { categoryDto, categoriesDto } = require("../dto/category.dto");
 
 class CategoryController {
+    static model = 'category';
+    static categoryService = new CategoryService(this.model, {include: { childrenCategory: true }});
+
     static get = async (req, res) => {
         try {
-            const data = await categoryService.get(req.params.key);
-            return controllerSuccess(res, 'get', 'category', data.id, categoryDto(data));
+            const data = await this.categoryService.get(req.params.key);
+            return controllerSuccess(res, 'get', this.model, data.id, categoryDto(data));
         }
         catch (e) {
             controllerError(res, e);
@@ -15,8 +18,8 @@ class CategoryController {
 
     static all = async (req, res) => {
         try {
-            const data = await categoryService.all();
-            return controllerSuccess(res, 'all', 'category', data.id, categoriesDto(data));
+            const data = await this.categoryService.all();
+            return controllerSuccess(res, 'all', this.model, data.id, categoriesDto(data));
         }
         catch (e) {
             controllerError(res, e);
@@ -25,8 +28,8 @@ class CategoryController {
 
     static create = async (req, res) => {
         try {
-            const data = await categoryService.create(req.body, req.user.payload);
-            return controllerSuccess(res, 'create', 'category', null, categoryDto(data));
+            const data = await this.categoryService.create(req.body, req.user.payload);
+            return controllerSuccess(res, 'create', this.model, null, categoryDto(data));
         } catch (e) {
             controllerError(res, e);
         }
@@ -34,8 +37,8 @@ class CategoryController {
 
     static update = async (req, res) => {
         try {
-            const data = await categoryService.update(req.params.key, req.body, req.user.payload);
-            return controllerSuccess(res, 'update', 'category', data.id, categoryDto(data));
+            const data = await this.categoryService.update(req.params.key, req.body, req.user.payload);
+            return controllerSuccess(res, 'update', this.model, data.id, categoryDto(data));
         }
         catch (e) {
             controllerError(res, e);
@@ -44,8 +47,8 @@ class CategoryController {
 
     static delete = async (req, res) => {
         try {
-            const data = await categoryService.delete(req.params.key, req.user.payload);
-            return controllerSuccess(res, 'delete', 'category', data.id);
+            const data = await this.categoryService.delete(req.params.key, req.user.payload);
+            return controllerSuccess(res, 'delete', this.model, data.id);
         }
         catch (e) {
             controllerError(res, e);
@@ -54,8 +57,8 @@ class CategoryController {
 
     static restore = async (req, res) => {
         try {
-            const data = await categoryService.restore(req.params.key, req.user.payload);
-            return controllerSuccess(res, 'restore', 'category', data.id, categoryDto(data));
+            const data = await this.categoryService.restore(req.params.key, req.user.payload);
+            return controllerSuccess(res, 'restore', this.model, data.id, categoryDto(data));
         }
         catch (e) {
             controllerError(res, e);

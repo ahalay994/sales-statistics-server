@@ -1,13 +1,13 @@
 const helper = require("../helper");
 const profileDto = (profile) => ({
     /** @type {string} */
-    firstName: profile.firstName,
+    firstName: profile?.firstName || null,
     /** @type {string} */
-    lastName: profile.lastName,
+    lastName: profile?.lastName || null,
     /** @type {string} */
-    patronymicName: profile.patronymicName,
+    patronymicName: profile?.patronymicName || null,
     /** @type {string} */
-    dateOfBirth: helper.formatDate(profile.dateOfBirth),
+    dateOfBirth: profile?.dateOfBirth ? helper.formatDate(profile.dateOfBirth) : null,
 });
 
 

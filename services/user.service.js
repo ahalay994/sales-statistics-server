@@ -2,15 +2,16 @@ const prisma = require('../utils/prisma');
 const createError = require('http-errors');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
+// const {getApi, allApi} = require("../api");
 
 class UserService {
+    static model = 'user'
+
     static async get(id) {
-        const user = await prisma.user.findFirst({
-            where: {
-                id,
-                isBlocked: false,
-                deletedAt: null
-            },
+        const where = {
+            isBlocked: false,
+        }
+        const include = {
             include: {
                 UserAccess: {
                     include: {
@@ -18,29 +19,26 @@ class UserService {
                     },
                 },
                 Profile: true
-            },
-        });
-        if (!user) {
-            throw createError.NotFound('Пользователь не найден')
+            }
         }
-        return user;
+        return await getApi(id, this.model, include, where);
     }
 
     static async all() {
-        return await prisma.user.findMany({
-            where: {
-                isBlocked: false,
-                deletedAt: null
-            },
+        const where = {
+            isBlocked: false,
+        }
+        const include = {
             include: {
                 UserAccess: {
                     include: {
                         Access: true,
                     },
                 },
-                Profile: true,
-            },
-        });
+                Profile: true
+            }
+        }
+        // return await allApi(this.model, include, where,true, null);
     }
 
     static async create(req) {

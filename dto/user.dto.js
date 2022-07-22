@@ -7,11 +7,11 @@ const userDto = (user) => ({
     /** @type {boolean} */
     isBlocked: user.isBlocked,
     /** @type {string} */
-    access: user.UserAccess.Access.name,
+    access: user.UserAccess?.Access?.name,
     /** @type {boolean} */
-    isAdmin: user.UserAccess.Access.slug === 'admin',
+    isAdmin: user.UserAccess?.Access?.slug === 'admin',
     /** @type {profileDto} */
-    profile: profileDto(user.Profile)
+    profile: user.Profile ? profileDto(user.Profile) : undefined,
 });
 
 const usersDto = (users) => ({
