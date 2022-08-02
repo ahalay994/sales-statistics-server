@@ -9,7 +9,7 @@ class AccessController {
 
     /*** Private functions ***/
     static #getPaginationParams(query) {
-        const { page = 1, limit = 2 } = query;
+        const { page = 1, limit = 10 } = query;
         return {page, limit}
     }
     /*** Private functions ***/
