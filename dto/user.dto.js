@@ -1,4 +1,6 @@
 const {profileDto} = require("./profile.dto");
+const {accessDto} = require("./access.dto");
+const {userAccessDto} = require("./userAccess.dto");
 const userDto = (user) => ({
     /** @type {number} */
     id: user.id,
@@ -13,7 +15,9 @@ const userDto = (user) => ({
     /** @type string */
     accessToken: user.accessToken || undefined,
     /** @type {profileDto} */
-    profile: user.Profile ? profileDto(user.Profile) : undefined,
+    Profile: user.Profile ? profileDto(user.Profile) : undefined,
+    /** @type {userAccessDto} */
+    UserAccess: user.UserAccess ? userAccessDto(user.UserAccess) : undefined,
 });
 
 const usersDto = (users) => ({

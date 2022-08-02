@@ -32,10 +32,47 @@ class ApiClass {
         return record;
     }
 
-    async all(pagination = {}) {
+    async all(pagination = {}, query = null) {
+        let args = this.args;
+
+        let paginationQuery = {};
+        if (!!Object.values(pagination).length) {
+            const {page, limit} = pagination;
+            paginationQuery = {
+                skip: Number(page * limit - limit),
+                take: Number(limit),
+            }
+            delete query.page;
+            delete query.limit;
+        }
+
+        if (query) {
+            //search
+            if (query.search) {
+                args = {
+                    ...this.args,
+                    where: {
+                        ...this.args.where,
+                        name: {
+                            mode: 'insensitive',
+                            contains: query.search
+                        },
+                    },
+                }
+            }
+            delete query.search;
+            // filter
+            if (!!Object.values(query).length) {
+                const orderArgs = Object.entries(query)[0];
+                args = {
+                    ...args,
+                    orderBy: {[orderArgs[0]]: orderArgs[1]}
+                }
+            }
+        }
         return await prisma[this.model].findMany({
-            ...this.args,
-            ...pagination,
+            ...args,
+            ...paginationQuery,
         });
     }
 

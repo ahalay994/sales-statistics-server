@@ -7,7 +7,7 @@ const profileDto = (profile) => ({
     /** @type {string} */
     patronymicName: profile?.patronymicName || null,
     /** @type {string} */
-    dateOfBirth: profile?.dateOfBirth ? helper.formatDate(profile.dateOfBirth) : null,
+    dateOfBirth: profile?.dateOfBirth ? helper.formatDateToTimestamp(profile.dateOfBirth) : null,
 });
 
 
