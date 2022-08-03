@@ -1,6 +1,6 @@
 const {profileDto} = require("./profile.dto");
-const {accessDto} = require("./access.dto");
 const {userAccessDto} = require("./userAccess.dto");
+const {paginationDto} = require("./global.dto");
 const userDto = (user) => ({
     /** @type {number} */
     id: user.id,
@@ -24,8 +24,13 @@ const usersDto = (users) => ({
     data: users.map(userDto),
 }).data;
 
+const usersPaginationDto = (users, page, limit, usersAll) => ({
+    data: usersDto(users),
+    pagination: paginationDto(page, limit, usersAll.length)
+});
 
 module.exports = {
     userDto,
     usersDto,
+    usersPaginationDto,
 }

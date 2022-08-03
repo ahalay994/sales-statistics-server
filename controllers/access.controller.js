@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 
 class AccessController {
     static model = 'access';
-    static accessService = new AccessService(this.model, {}, false);
+    static accessService = new AccessService(this.model, {}, false, ['name']);
 
     /*** Private functions ***/
     static #getPaginationParams(query) {
@@ -24,7 +24,7 @@ class AccessController {
     }
     static all = async (req, res) => {
         try {
-            const { page, limit } = AccessController.#getPaginationParams(req.query);
+            const { page, limit } = this.#getPaginationParams(req.query);
             delete req.query?.page;
             delete req.query?.limit;
             // get

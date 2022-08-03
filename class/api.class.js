@@ -3,7 +3,7 @@ const createError = require("http-errors");
 const message = require('../helper/message');
 
 class ApiClass {
-    constructor(model, args = {}, isDeleted = true) {
+    constructor(model, args = {}, isDeleted = true, searchQuery = {}) {
         this.model = model;
         this.args = {
             where: {
@@ -13,6 +13,7 @@ class ApiClass {
             ...args.include ? {include: {...args.include}} : {},
             ...args.orderBy ? {orderBy: {...args.orderBy}} : {orderBy: {id: 'asc'}},
         };
+        this.searchQuery = searchQuery;
     }
 
     async get(key) {
@@ -53,10 +54,7 @@ class ApiClass {
                     ...this.args,
                     where: {
                         ...this.args.where,
-                        name: {
-                            mode: 'insensitive',
-                            contains: query.search
-                        },
+                        ...this.#searchQuery(query.search)
                     },
                 }
             }
@@ -116,6 +114,40 @@ class ApiClass {
                 }
             }
         );
+    }
+
+    #searchQuery(searchValue) {
+        const query = [];
+        for (const field of this.searchQuery) {
+            if (typeof field === 'string') {
+                query.push({
+                    [field]: {
+                        mode: 'insensitive',
+                        contains: searchValue
+                    }
+                });
+            }
+            if (typeof field === 'object') {
+                for (const subField of field) {
+                    for (const [key, value] of Object.entries(subField)) {
+                        for (const _field of value) {
+                            query.push({
+                                [key]: {
+                                    [_field]: {
+                                        mode: 'insensitive',
+                                        contains: searchValue
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        return {
+            OR: query
+        }
     }
 
     #checkIdOrSlug = key => !isNaN(Number(key)) ? {id: Number(key)} : {slug: key};

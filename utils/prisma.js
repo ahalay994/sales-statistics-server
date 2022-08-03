@@ -11,7 +11,7 @@ prisma.$use(async (params, next) => {
             data.slug = slugify(`${data.name}`, {lower: true, strict: true, remove: /[*+~.()'"!:@]/g});
         }
     }
-    let userId = 0;
+    let userId = null;
     if (data?.user) {
         userId = data.user.id;
         delete data.user;
@@ -25,7 +25,7 @@ prisma.$use(async (params, next) => {
                 model: params.model,
                 modelId: result.id,
                 action: !!data.deletedAt ? 'delete' : (data?.deletedAt === null ? 'restore' : params.action),
-                userId: userId,
+                userId,
                 ip: ip.address(),
             }
         });

@@ -3,7 +3,7 @@ const paginationDto = (page, limit, count) => {
         page: +page,
         limit: +limit,
         totalCount: count,
-        totalPages: Math.ceil(count / limit),
+        pageCount: Math.ceil(count / limit),
     }
 };
 

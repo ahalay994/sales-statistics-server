@@ -1,20 +1,42 @@
 const UserService = require('../services/user.service');
 const {controllerError, controllerSuccess} = require('../helper/controller.helper');
-const { userDto, usersDto } = require("../dto/user.dto");
+const {userDto, usersPaginationDto} = require("../dto/user.dto");
 const bcrypt = require("bcryptjs");
 
 class UserController {
     static model = 'user';
     static userService = new UserService(this.model, {
-        include: {
-            Profile: true,
-            UserAccess: {
-                include: {
-                    Access: true
+            include: {
+                Profile: true,
+                UserAccess: {
+                    include: {
+                        Access: true
+                    }
                 }
-            }
-        }
-    });
+            },
+        },
+        null,
+        [
+            'email',
+            [
+                {
+                    Profile: [
+                        'firstName',
+                        'lastName',
+                        'patronymicName',
+                    ]
+                }
+            ]
+        ]
+    );
+
+    /*** Private functions ***/
+    static #getPaginationParams(query) {
+        const {page = 1, limit = 2} = query;
+        return {page, limit}
+    }
+
+    /*** Private functions ***/
 
     static get = async (req, res) => {
         try {
@@ -26,8 +48,17 @@ class UserController {
     }
     static all = async (req, res) => {
         try {
-            const data = await this.userService.all();
-            return controllerSuccess(res, 'all', this.model, data.id, usersDto(data));
+            const {page, limit} = this.#getPaginationParams(req.query);
+            delete req.query?.page;
+            delete req.query?.limit;
+            // get
+            let query = {...req.query};
+            const data = await this.userService.all({page, limit}, query);
+            // get all records
+            query = {...req.query};
+            const dataAll = await this.userService.all({}, query);
+
+            return controllerSuccess(res, 'all', this.model, data.id, usersPaginationDto(data, page, limit, dataAll));
         } catch (e) {
             controllerError(res, e);
         }
@@ -63,7 +94,7 @@ class UserController {
             let data = req.body;
             const user = {
                 email: data.email,
-                password: bcrypt.hashSync(data.password, 8),
+                // password: bcrypt.hashSync(data.password, 8),
                 Profile: {
                     update: {
                         firstName: data.firstName,
@@ -79,6 +110,15 @@ class UserController {
                 }
             }
             data = await this.userService.update(req.params.id, user, req.user.payload);
+            return controllerSuccess(res, 'update', this.model, data.id, userDto(data));
+        } catch (e) {
+            controllerError(res, e);
+        }
+    }
+    static isBlockedUpdate = async (req, res) => {
+        try {
+            let data = req.body;
+            data = await this.userService.update(req.params.id, data, req?.user?.payload);
             return controllerSuccess(res, 'update', this.model, data.id, userDto(data));
         } catch (e) {
             controllerError(res, e);
